@@ -1,0 +1,124 @@
+@import url("jquery.css");
+@import url("asyncbox.css");
+
+* {margin:0;padding:0}
+a{color:#111; text-decoration:none}
+a:hover {color:#c00; text-decoration:underline}
+li{list-style:none;text-overflow:ellipsis;overflow:hidden;white-space:nowrap}
+img{border:none}
+label,img,input{vertical-align:middle}
+
+html,body{font:12px/1.5em "ËÎÌו",Arial,Verdana,Helvetica,sans-serif;color:#111;overflow-x:hidden;height:100%;}
+body2{scrollbar-arrow-color:#ffffff;scrollbar-3dlight-color:#3c83a6;scrollbar-base-color:#3a95c2;scrollbar-track-color:#7dbad8;}
+
+a.help{background:url(help.gif) no-repeat center center; color:#fff; cursor:pointer; padding:0 5px; text-decoration:none}
+a.help:hover{background:url(help_hover.gif) no-repeat center center}
+
+span.help{background:url(centerPoi.gif) no-repeat 10px center; color:#999; padding-left:30px; font-family:"ËÎÌו"}
+
+
+.hide{display:none}
+.clear{ clear:both}
+
+.editinput{height:26px;line-height:26px; padding:0 4px; border:1px solid #ffffff; background:#ffffff}
+.editinput_on{border:inset 1px #ccc; background:#FEF9E9}
+
+#server li{height:30px; line-height:30px; background:url(line.gif) repeat-x left bottom}
+#server li a{color:#CC0000; text-decoration:none}
+
+
+.toolbar{background:#d9edf9 url(ico_user.gif) no-repeat 10px center; height:40px; line-height:40px;padding-left:36px}
+.toolbar .adminpath{ float:left}
+.toolbar .tool{float:right; padding-right:20px;}
+.toolbar .tool img{vertical-align:middle}
+.toolbar .tool a{display:block;float:left;width:45px; padding-left:22px; background-position:left 11px; background-repeat:no-repeat}
+.toolbar .tool .anxinMall_refresh{background-image:url(anxinMall_refresh.gif)}
+.toolbar .tool .anxinMall_back{background-image:url(anxinMall_back.gif)}
+.toolbar .tool .anxinMall_go{background-image:url(anxinMall_go.gif)}
+
+
+.adminmain{padding-top:20px;padding-bottom:40px;width:100%; margin:0 auto}
+
+.adminmain .subtable{padding:0; margin:0; background:#000}
+.adminmain .subtable td{padding:0}
+
+.adminmain table{margin:10px auto 0 auto}
+
+.adminmain table.admintable{border:1px solid #97c4e0}
+.adminmain table.admintable .nobg th,
+.adminmain table.admintable .nobg td{background-image:none}
+.adminmain table.admintable tbody tr th{background:#e4f1f8 url(line_2.gif) left bottom repeat-x; text-align:right}
+.adminmain table.admintable tbody tr td{background:#ffffff url(line_2.gif) left bottom repeat-x}
+
+.adminmain table.admintable tbody tr td table tr td{background:#ffffff}
+
+
+
+.adminmain table.admintable .th1{background:url(anxinMall_title_bg.gif) repeat-x;text-align:center;color:#111;letter-spacing:2px}
+
+.adminmain table.admintable .th2{background:#e4f1f8;color:#333;font-weight:bold;font-size:14px}
+.adminmain table.admintable .th2 td{padding-left:10px}
+.adminmain table.admintable .th2 th{font-weight:bold; text-align:center}
+
+
+
+
+.adminmain table.table1{background:#ccc}
+
+.over{background-color:#000}
+
+
+.adminmain table thead tr{height:30px;font-weight:bold}
+
+.adminmain table tbody tr th{padding:10px;font-weight:normal;font-size:12px;color:#000}
+.adminmain table tbody tr td{padding:10px}
+.adminmain table tbody tr td img{margin:0 5px}
+.adminmain table tbody tr td table{margin:0}
+.adminmain table tbody tr td table td{padding:0}
+.adminmain table tbody tr td input{vertical-align:middle}
+.adminmain table tbody tr td label{padding-right:10px}
+.adminmain table tbody tr td label input{margin-right:4px}
+
+
+.edit{margin:0 auto; overflow:hidden}
+.edit a{display:block; float:left; text-indent:-9999px; margin:0 5px; cursor:pointer}
+
+.e1{background:url(ico_5_1.gif) no-repeat; width:16px; height:16px}
+.e2{background:url(ico_5_6.gif) no-repeat; width:16px; height:16px}
+.e3{background:url(ico_5_3.gif) no-repeat; width:16px; height:16px}
+.e4{background:url(ico_5_4.png) no-repeat; width:16px; height:16px}
+.e5{background:url(ico_5_5.png) no-repeat; width:16px; height:16px}
+
+input.input{height:26px; line-height:26px; padding:0 4px; border:1px inset #bbb; margin-right:6px; background:#fff9e8; font-size:12px; color:#222}
+textarea.textarea{padding:5px;border:1px inset #bbb; background:#FFF9E8; font-size:12px; color:#222;margin-right:6px;}
+
+input.submit{border:none; background:url(submit.gif) no-repeat; width:100px; height:30px; margin-right:5px}
+input.button{padding:4px 10px}
+input.button_1{height:26px;background:url(button_1.gif) repeat-x; font-size:12px; padding:0 5px; border:1px solid #999}
+input.button_2{height:26px;background:url(button_2.gif) repeat-x; font-size:12px; padding:0 5px; border:1px solid #999}
+/*
+input.button_2{padding:2px;filter:progid:DXImageTransform.Microsoft.Gradient(GradientType=0,StartColorStr=#ffffff, EndColorStr=#9ccde9);border:1px solid #257fb7;cursor:hand; font-size:12px}
+*/
+
+
+select{font-size:12px}
+
+
+
+
+
+.pages{padding:20px 30px 10px 0;line-height:25px; float:right}
+.pages a{padding: 4px 6px 4px 6px; border:1px solid #ddd;margin-left:3px}
+.pages a:link,.pages a:visited{color:#00699b}
+.pages .text{width:40px}
+.pages .current{cursor:default}
+.pages a.current,.pages a:hover{background:#007ec1 url(page_bg.gif) repeat-x;color:#FFFFFF}
+
+
+
+
+.set{margin-top:10px; padding:10px 30px; float:left}
+.set input{padding:5px}
+
+
+.copyright{font-family:Arial, Helvetica, sans-serif; color:#666; text-align:center; height:50px;clear:both}
