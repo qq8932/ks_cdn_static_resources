@@ -1,0 +1,313 @@
+#TB_window {
+	font: 12px Arial, Helvetica, sans-serif;
+	color: #333333;
+}
+
+#TB_secondLine {
+	font: 10px Arial, Helvetica, sans-serif;
+	color:#666666;
+}
+
+#TB_window a:link {color: #666666;}
+#TB_window a:visited {color: #666666;}
+#TB_window a:hover {color: #000;}
+#TB_window a:active {color: #666666;}
+#TB_window a:focus{color: #666666;}
+
+#TB_overlay {
+	position: fixed;
+	z-index:100;
+	top: 0px;
+	left: 0px;
+	height:100%;
+	width:100%;
+}
+
+#TB_shadow {
+	position: fixed;
+	background-color:#000;
+	filter:alpha(opacity=40);
+	-moz-opacity: 0.4;
+	opacity: 0.4;
+	z-index: 100;
+	color:#000000;
+	display:none;
+	text-align:left;
+	top:50%;
+	left:50%;
+}
+
+
+* html #TB_shadow { /* ie6 hack */
+position: absolute;
+margin-top: expression(0 - parseInt(this.offsetHeight / 2) + (TBWindowMargin = document.documentElement && document.documentElement.scrollTop || document.body.scrollTop) + 'px');
+}
+
+
+.TB_overlayMacFFBGHack {background: url(macFFBgHack.png) repeat;}
+.TB_overlayBG {
+	background-color:#000;
+	filter:alpha(opacity=40);
+	-moz-opacity: 0.4;
+	opacity: 0.4;
+}
+
+* html #TB_overlay { /* ie6 hack */
+     position: absolute;
+     height: expression(document.body.scrollHeight > document.body.offsetHeight ? document.body.scrollHeight : document.body.offsetHeight + 'px');
+}
+
+#TB_window {
+	position: fixed;
+	background: #ffffff;
+	z-index: 102;
+	color:#000000;
+	display:none;
+	text-align:left;
+	top:50%;
+	left:50%;
+}
+
+* html #TB_window { /* ie6 hack */
+position: absolute;
+margin-top: expression(0 - parseInt(this.offsetHeight / 2) + (TBWindowMargin = document.documentElement && document.documentElement.scrollTop || document.body.scrollTop) + 'px');
+}
+
+
+
+
+#TB_caption{
+	height:36px;
+	line-height:36px;
+	padding:0 30px 0 25px;
+	float:left;
+}
+
+#TB_closeWindow{
+	height:25px;
+	padding:11px 25px 10px 0;
+	float:right;
+}
+
+#TB_closeAjaxWindow{
+	margin-bottom:1px;
+	text-align:right;
+	float:right;
+	padding-right:10px;
+}
+
+#TB_closeAjaxWindow a{color:#111; font-size:12px}
+
+#TB_ajaxWindowTitle{
+	float:left;
+	padding-left:35px;
+	margin-bottom:1px;
+	background:url(../images/thick_title_ico.gif) no-repeat 10px 8px;
+	color:#0071b8;
+	font-size:14px;
+	font-weight:normal
+}
+
+#TB_title{
+	background:url(../images/thick_title.gif)  repeat-x;
+	height:36px;
+	line-height:36px;
+	font-size:12px;
+	font-weight:bold
+}
+
+
+#TB_ajaxContent{
+	clear:both;
+	padding:2px 15px 15px 15px;
+	overflow:auto;
+	text-align:left;
+	line-height:1.4em;
+}
+
+#TB_ajaxContent.TB_modal{
+	padding:15px;
+}
+
+#TB_ajaxContent p{
+	padding:5px 0px 5px 0px;
+}
+
+#TB_load{
+	position: fixed;
+	display:none;
+	height:13px;
+	width:208px;
+	z-index:103;
+	top: 50%;
+	left: 50%;
+	margin: -6px 0 0 -104px; /* -height/2 0 0 -width/2 */
+}
+
+* html #TB_load { /* ie6 hack */
+position: absolute;
+margin-top: expression(0 - parseInt(this.offsetHeight / 2) + (TBWindowMargin = document.documentElement && document.documentElement.scrollTop || document.body.scrollTop) + 'px');
+}
+
+#TB_HideSelect{
+	z-index:99;
+	position:fixed;
+	top: 0;
+	left: 0;
+	background-color:#fff;
+	border:none;
+	filter:alpha(opacity=0);
+	-moz-opacity: 0;
+	opacity: 0;
+	height:100%;
+	width:100%;
+}
+
+* html #TB_HideSelect { /* ie6 hack */
+     position: absolute;
+     height: expression(document.body.scrollHeight > document.body.offsetHeight ? document.body.scrollHeight : document.body.offsetHeight + 'px');
+}
+
+#TB_iframeContent{
+	clear:both;
+	border:none;
+	margin-bottom:-1px;
+	margin-top:1px;
+	_margin-bottom:1px;
+}
+
+
+
+
+
+
+div.tabs{width:95%; margin:0 auto}
+
+
+ul.tabs { 
+	height:34px;
+	background:url(../images/tab_line.gif) repeat-x left bottom	;
+	overflow:hidden
+}
+
+ul.tabs li { 
+	float:left;
+	height:34px;
+	text-indent:0;
+	padding:0 3px;
+}
+
+ul.tabs a { 
+	background-image:url(../images/tab.gif);
+	background-repeat:no-repeat;
+	background-position:left -29px;
+	display:block;
+	text-decoration:none;
+	color:#003555;
+	float:left;
+	padding-left:15px;
+}
+
+
+ul.tabs a strong{
+	display:block;
+	float:left;
+	height:29px;
+	line-height:29px;
+	padding-right:15px;
+	background-image:url(../images/tab.gif);
+	background-repeat:no-repeat;
+	background-position:right -29px;
+	font-weight:normal;
+}
+
+
+ul.tabs a.selected { 
+	background-position:left top;
+}
+
+ul.tabs a.selected strong{
+	background-position:right top;
+	color:#000;
+}
+
+
+.growlUI h1,.growlUI h2 { font-family: 'trebuchet ms', verdana, arial; padding: 10px; margin: 0 }
+.growlUI h1 { font-size: large }
+.growlUI h2 { color: #800; padding-left:0; font-size: large; font-weight: normal; }
+
+
+
+
+
+
+
+
+
+
+
+
+#popup_container {
+	font-family: Arial, sans-serif;
+	font-size: 12px;
+	min-width: 300px; /* Dialog will be no smaller than this */
+	max-width: 600px; /* Dialog will wrap after this width */
+	background: #FFF;
+	border: solid 5px #999;
+	color: #000;
+	-moz-border-radius: 5px;
+	-webkit-border-radius: 5px;
+	border-radius: 5px;
+}
+
+#popup_title {
+	font-size: 12px;
+	font-weight:normal;
+	text-align: center;
+	line-height: 2em;
+	color: #666;
+	background: #CCC url(../images/title.gif) top repeat-x;
+	border: solid 1px #FFF;
+	border-bottom: solid 1px #999;
+	cursor: default;
+	padding: 0em;
+	margin: 0em;
+	font-family:"ËÎÌו";
+}
+
+#popup_content {
+	background: 16px 16px no-repeat url(../images/info.gif);
+	padding: 2em 1.75em;
+	margin: 0em;
+	font-family:"ËÎÌו";
+}
+
+#popup_content input{
+	font-size:12px;
+	padding:4px;
+}
+
+#popup_content .alert {
+	background-image: url(../images/info.gif);
+}
+
+#popup_content .confirm {
+	background-image: url(../images/important.gif);
+}
+
+#popup_content .prompt {
+	background-image: url(../images/help.gif);
+}
+
+#popup_message {
+	padding-left: 48px;
+}
+
+#popup_panel {
+	text-align: center;
+	padding-top:20px;
+}
+
+#popup_prompt {
+	margin: .5em 0em;
+}
