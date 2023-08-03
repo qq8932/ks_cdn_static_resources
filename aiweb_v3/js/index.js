@@ -13,6 +13,10 @@ var layerqrcode = 0;
 var loading = 0;
 var currentTime;
 var freezegogogo = false;
+var layerconfirm = 0;
+var refreshhistorytime = 0;
+var nextrefreshhistorytime = 1;
+var check_chat_exist = false;
 
 var defaults = {
     html: false,        // Enable HTML tags in source
@@ -63,6 +67,21 @@ $(document).ready(function () {
         }
         $(".home_prompt-hints").hide();
     });
+
+    $('#question').click(function () {
+        checkloginstatus();
+    });
+    $('.home_sidebar-body').scroll(function () {
+        var element = $(this);
+        if (element.scrollTop() + element.innerHeight() + 10 >= element[0].scrollHeight) {
+            // 滚动条已经滚动到最下方
+            if (refreshhistorytime < nextrefreshhistorytime) {
+                refreshhistorytime++;
+                refreshhistory(refreshhistorytime);
+            }
+        }
+    });
+
 });
 
 
@@ -111,7 +130,7 @@ $(function () {
         userrndstr = decryptCookie($.cookie('userrndstr'), 'ChatGPT');
         checkuserstatus();
     } else {
-        userrndstr = randomString(16) + new Date().getTime();
+        userrndstr = randomString(8) + websiterndstr;
     }
 
     // 模型、角色下拉框
@@ -127,8 +146,10 @@ $(function () {
             data: mode_js,
             click: function (data, othis) {
                 $('#model').val(data.modelid);
+                $('#modelvalue').val(data.modelvalue);
                 $(this.elem).children('span').text(data.title);
                 $.cookie('model', data.modelid);
+                $.cookie('modelvalue', data.modelvalue);
                 $.cookie('modelname', data.title);
             }
         });
@@ -202,6 +223,13 @@ $.fn.new_toggle = function (fn, fn2) {
     return this.click(toggle);
 };
 
+function checkloginstatus() {
+    if (!user_uid) {
+        $('.home_sidebar').toggleClass('home_sidebar-show');
+        showqrcode();
+    }
+}
+
 // 新建会话
 function create_chat() {
     if ($(".home_chat-item-title:first").text() == "新的聊天") {
@@ -239,7 +267,9 @@ function show_mathjax(obj) {
         "HTML-CSS": {
             availableFonts: ["STIX", "TeX"],
             showMathMenu: false
-        }
+        },
+        showProcessingMessages: false,    //隐藏加载时候左下角加载情况的展示
+        messageStyle: "none"              //隐藏加载时候左下角加载情况的展示
     });
     MathJax.Hub.Queue(["Typeset", MathJax.Hub], obj);
 }
@@ -293,7 +323,20 @@ function chat_prepend(id, name, num = 0, time = getMyDate()) {
 
     $('.home_sidebar-body').children().removeClass("home_chat-item-selected");
     $('.home_sidebar-body').prepend(html);
-    //$('.home_chat-body').html('');
+}
+
+function chat_append(id, name, num = 0, time = getMyDate()) {
+    var html = '<div id=' + id + ' class="home_chat-item home_chat-item-selected" onclick="showconversation(' + id + ');">' +
+        '<div class="home_chat-item-title">' + name + '</div>' +
+        '<div class="home_chat-item-info">' +
+        '<div class="home_chat-item-count">' + num + ' 条对话</div>' +
+        '<div class="home_chat-item-date">' + time + '</div>' +
+        '</div>' +
+        '<i onclick="deleteconversation(' + id + ')" class="layui-icon home_chat-item-delete">&#xe693;</i>' +
+        '</div>';
+
+    $('.home_sidebar-body').children().removeClass("home_chat-item-selected");
+    $('.home_sidebar-body').append(html);
 }
 
 // 会话页面滚动到底部
@@ -347,11 +390,11 @@ function showqrcode() {
                 shade: 0.4,
                 time: false //取消自动关闭
             });
-            location.href = "http://" + window.location.hostname + "/s.php?m=1&s=" + userrndstr;
+            location.href = window.location.protocol + "//" + window.location.hostname + "/s.php?m=1&s=" + userrndstr;
         } else {
 
             $("#mycontent").html("");
-            $("#mycontent").qrcode("http://" + window.location.hostname + "/s.php?s=" + userrndstr);
+            $("#mycontent").qrcode(window.location.protocol + "//" + window.location.hostname + "/s.php?s=" + userrndstr);
             checkuserstatus();
             $("#mytitle").html(logintitleleft);
             layerqrcode = layer.open({
@@ -372,7 +415,7 @@ function showqrcode() {
 function showwxlogin() {
     $("#mytitle").html(logintitleleft);
     $("#mycontent").html("");
-    $("#mycontent").qrcode("http://" + window.location.hostname + "/s.php?s=" + userrndstr);
+    $("#mycontent").qrcode(window.location.protocol + "//" + window.location.hostname + "/s.php?s=" + userrndstr);
 }
 
 // 邮箱密码登录
@@ -523,7 +566,7 @@ function gogogo(msg) {
     freezegogogo = true;
 
     if (!buttongo) {
-        if ($(".mode_js span").text().indexOf("画") < 0) {
+        if ($("#modelvalue").val().indexOf("image") < 0) {
             if (timer) {
                 clearInterval(timer);
                 buttongo = true;
@@ -629,19 +672,30 @@ function starttoask() {
     // 发送内容写入聊天界面
     buttongo = false;
     answer = randomString(16);
-    ai_output(answer, getMyDate(), $(".mode_js span").text().split("（")[0], 'AI正在思考...');
+
+    if ($("#modelvalue").val().indexOf("image") >= 0) {
+        tips = "AI正在生成图片中……";
+    } else {
+        tips = "AI正在思考……";
+    }
+    ai_output(answer, getMyDate(), $(".mode_js span").text().split("（")[0], tips);
     retrytimes = 0;
     send_post();
 }
 
 // 发送消息
 function send_post() {
+    if ($("#modelvalue").val().indexOf("image") >= 0) {
+        tips = "AI正在生成图片中……";
+    } else {
+        tips = "AI正在思考……";
+    }
 
-    $("#question").val("AI正在思考……");
+    $("#question").val(tips);
     $("#question").attr("disabled", true);
     $("#go").text(" 中止 ");
 
-    loading = layer.msg('AI正在思考，请稍等片刻...', {
+    loading = layer.msg(tips, {
         icon: 16,
         shade: 0.4,
         skin: 'layui-layer-molv', //设置皮肤样式
@@ -664,6 +718,9 @@ function send_post() {
         $.get("getpicture.php?user=" + userrndstr, function (data) {
             layer.close(loading);
             loading = 0;
+            if (layerconfirm) {
+                layer.close(layerconfirm);
+            }
             if (data.error) {
                 var errcode = data.error.code;
                 var errmsg = data.error.message;
@@ -692,7 +749,7 @@ function send_post() {
                 chat_roll();
                 return;
             } else {
-                $("#" + answer).html("<img onload='chat_roll();' src='pictureproxy.php?url=" + encodeURIComponent(data.data[0].url) + "'>");
+                $("#" + answer).html("<img onload='chat_roll();showpic();' src='pictureproxy.php?url=" + encodeURIComponent(data.data[0].url) + "'>");
                 buttongo = true;
                 $("#question").val("");
                 $("#question").attr("disabled", false);
@@ -712,6 +769,9 @@ function send_post() {
             try {
                 layer.close(loading);
                 loading = 0;
+                if (layerconfirm) {
+                    layer.close(layerconfirm);
+                }
                 if (data.error) {
                     var errcode = data.error.code;
                     var errmsg = data.error.message;
@@ -766,10 +826,16 @@ function send_post() {
         isstarted = true;
         isalltext = false;
         alltext = "";
+        try {
+            es.close(); //EventSource有时会间隔3秒自动重连，并且不触发error事件。这行代码可以结束上一次死循环的连接。
+        } catch (e) { }
         es = new EventSource("stream.php?user=" + userrndstr);
         es.onerror = function (event) {
             layer.close(loading);
             loading = 0;
+            if (layerconfirm) {
+                layer.close(layerconfirm);
+            }
             es.close();
             buttongo = true;
             $("#" + answer).html("服务器访问超时或网络错误");
@@ -794,6 +860,9 @@ function send_post() {
 
                     layer.close(loading);
                     loading = 0;
+                    if (layerconfirm) {
+                        layer.close(layerconfirm);
+                    }
                     var errcode = json.error.code;
                     var errmsg = json.error.message;
 
@@ -820,6 +889,12 @@ function send_post() {
                     $("#go").text(" 发送 ");
                     if (!isMobile()) $("#question").focus();
                     return;
+                } else if (json.result) { //百度文心千帆处理正常流程
+                    if (alltext == "") {
+                        alltext = json.result.replace(/^\n+/, '');
+                    } else {
+                        alltext += json.result;
+                    }
                 } else if (json.choices[0].delta.hasOwnProperty("content")) { //处理正常流程的data
                     if (alltext == "") {
                         alltext = json.choices[0].delta.content.replace(/^\n+/, '');
@@ -839,6 +914,9 @@ function send_post() {
                     isstarted = false;
                     layer.close(loading);
                     loading = 0;
+                    if (layerconfirm) {
+                        layer.close(layerconfirm);
+                    }
                     str_ = '';
                     i = 0;
                     strforcode = '';
@@ -906,6 +984,9 @@ function send_post() {
                                         success: function (data) {
                                             layer.close(loading);
                                             loading = 0;
+                                            if (layerconfirm) {
+                                                layer.close(layerconfirm);
+                                            }
                                             if (!data.isvalid) {
                                                 strforcode = "AI的回答未通过内容审核！";
                                                 renderhtml(strforcode);
@@ -914,6 +995,9 @@ function send_post() {
                                         error: function () {
                                             layer.close(loading);
                                             loading = 0;
+                                            if (layerconfirm) {
+                                                layer.close(layerconfirm);
+                                            }
                                         }
                                     });
                                 }
@@ -927,19 +1011,34 @@ function send_post() {
                                 if (!isMobile()) $("#question").focus();
                                 refreshquota();
                                 messageLog();
-                                if (contextarray.length == 1) {
-                                    changeConversationName();
-                                    // refreshhistory();
+                                changeConversationName();
+
+                                if ($('#' + $.cookie('check_id') + ' .home_chat-item-title').text() == '新的聊天') {
+                                    $('.home_export-content').html('###' + prompt);
                                 }
+                                mathjaxstr = (strforcode.split("$").length > 2) ? '<div class="home_chat-message-top-action" onclick="show_mathjax(this)">显示公式</div>' : '';
+                                $("#" + answer).prev().html(mathjaxstr + $("#" + answer).prev().html());
+                                $('.home_export-content').append("\r\n## 来自 你 的消息:\r\n" + prompt);
+                                $('.home_export-content').append("\r\n## 来自 AI 的消息:\r\n" + mdHtml.render(strforcode));
                             }
                         }
                         renderhtml(strforcode);
                         previousScrollPosition = $('.home_chat-body').prop("scrollTop");
                     }, timewait);
                 }
+                if (json.is_end) { //百度文心千帆处理正常流程结束标志
+                    isalltext = true;
+                    contextarray.push([encodeURIComponent(prompt), encodeURIComponent(alltext)]);
+                    contextarray = contextarray.slice(-5);
+                    es.close();
+                    return;
+                }
             } catch (e) {
                 layer.close(loading);
                 loading = 0;
+                if (layerconfirm) {
+                    layer.close(layerconfirm);
+                }
                 isalltext = true;
                 buttongo = true;
                 es.close();
@@ -971,9 +1070,9 @@ function send_post() {
         dataType: "json",
         success: function (data) {
             if (data.success) {
-                if (($(".mode_js span").text().toLowerCase().indexOf("mj") >= 0) || ($(".mode_js span").text().toLowerCase().indexOf("mid") >= 0)) {
+                if ($("#modelvalue").val() == "midjourney_image") {
                     mjdraw();
-                } else if ($(".mode_js span").text().indexOf("画") >= 0) {
+                } else if ($("#modelvalue").val().indexOf("image") >= 0) {
                     draw();
                 } else {
                     streaming();
@@ -993,6 +1092,19 @@ function send_post() {
     });
 }
 
+function showpic() {
+    $(".markdown-body").on("click", "img", function () {
+        var imageUrl = $(this).attr("src");
+        $(".overlay img").attr("src", imageUrl);
+        $(".overlay").fadeIn();
+        $("body").css("overflow", "hidden");
+    });
+
+    $(".overlay").click(function () {
+        $(".overlay").fadeOut();
+        $("body").css("overflow", "auto");
+    });
+}
 function refreshmjpic(lastpic) {
     $.get("/plugins/mj/apiproxy.php?user=" + user_uid + "&rid=" + randomString(10), function (data) {
         if (data.error) {
@@ -1015,7 +1127,7 @@ function refreshmjpic(lastpic) {
                 }
                 setTimeout("refreshmjpic('" + data.data[0].url + "');", 2000);
             } else {
-                $("#" + answer).html("<img onload='chat_roll();' src='" + data.data[0].url + "'><img onload='chat_roll();' src='" + data.data[1].url + "'><img onload='chat_roll();' src='" + data.data[2].url + "'><img onload='chat_roll();' src='" + data.data[3].url + "'>");
+                $("#" + answer).html("<img onload='chat_roll();showpic();' src='" + data.data[0].url + "'><img onload='chat_roll();' src='" + data.data[1].url + "'><img onload='chat_roll();' src='" + data.data[2].url + "'><img onload='chat_roll();' src='" + data.data[3].url + "'>");
                 buttongo = true;
                 $("#question").val("");
                 $("#question").attr("disabled", false);
@@ -1027,23 +1139,34 @@ function refreshmjpic(lastpic) {
 }
 
 // 历史记录
-function refreshhistory() {
+function refreshhistory(more = 0) {
     $.ajax({
-        url: "getuserconversation.php?type=all&userrndstr=" + userrndstr,
+        url: "getuserconversation.php?type=all&userrndstr=" + userrndstr + "&more=" + more,
         dataType: "json",
         async: false,
         success: function (data) {
             if (data.success) {
-                $('.home_sidebar-body').html('');
-                var check_chat_exist = false;
+                if (more == 0) {
+                    $('.home_sidebar-body').html('');
+                }
                 $.each(data.conversation, function (k, v) {
                     if (v.id == $.cookie('check_id')) check_chat_exist = true;
-                    chat_prepend(v.id, v.question, v.num, v.realtime);
+                    chat_append(v.id, v.question, v.num, v.realtime);
                 })
-                if ($.cookie('check_id') == undefined || check_chat_exist == false) $.cookie('check_id', (data.conversation[data.conversation.length - 1].id));
-                showconversation($.cookie('check_id'));
+                if (more == 0) {
+                    if ($.cookie('check_id') == undefined || check_chat_exist == false) $.cookie('check_id', (data.conversation[0].id));
+                    showconversation($.cookie('check_id'));
+                } else {
+                    $('#' + $.cookie('check_id')).addClass('home_chat-item-selected').siblings().removeClass("home_chat-item-selected");
+                }
+                nextrefreshhistorytime = more + 1;
             } else {
-                create_chat();
+                if (more == 0) {
+                    create_chat();
+                } else {
+                    $('.home_sidebar-body').append('<div style="color:red;text-align:center;" class="home_chat-item home_chat-item-selected" onclick="deleteallconversation();">删除所有对话记录</div>');
+                    $('#' + $.cookie('check_id')).addClass('home_chat-item-selected').siblings().removeClass("home_chat-item-selected");
+                }
             }
         },
         complete: function () {
@@ -1092,9 +1215,37 @@ function deleteconversation(itemId) {
     });
 }
 
+function deleteallconversation() {
+    event.stopPropagation();//禁止父级事件
+    if ($('.home_sidebar-body').children().length <= 1) return false;
+
+    layer.confirm('确定要删除所有对话记录吗？', {
+        btn: ['确定', '取消'],
+        icon: 3,
+        title: '确认删除',
+    }, function (index) {
+        layer.close(index);
+        $.ajax({
+            url: "deluserconversation.php?type=all&userrndstr=" + userrndstr,
+            dataType: "json",
+            success: function (data) {
+                if (data.success) {
+                    location.reload();
+                } else {
+                    layer.msg(data.message);
+                }
+            },
+            error: function (xhr, status, error) {
+                layer.msg("网络错误或程序错误，请刷新重试。若一直无法成功，请联系管理员。");
+            }
+        });
+    });
+}
+
 function showconversation(id) {
     $.cookie('check_id', id);
     if ($.cookie('model')) $('#model').val($.cookie('model'));
+    if ($.cookie('modelvalue')) $('#modelvalue').val($.cookie('modelvalue'));
     if ($.cookie('modelname')) $('.mode_js').children('span').text($.cookie('modelname'));
     if ($.cookie('role')) $('#role').val($.cookie('role'));
     if ($.cookie('rolename')) $('.role_js').children('span').text($.cookie('rolename'));
@@ -1140,6 +1291,7 @@ function showconversation(id) {
                     user_output($("#question").val(), true);
                 }
                 chat_roll();
+                showpic();
             } else {
                 $.removeCookie('userrndstr');
                 layer.alert('您已在其他地方扫码登录过，本地保存的登录信息已失效。', {
@@ -1314,10 +1466,42 @@ function showwxpayqrcode() {
     buylayer = 0;
     var isWechat = /MicroMessenger/i.test(navigator.userAgent);
     if (isWechat) {
-        location.href = "http://" + window.location.hostname + "/wxpay.php?m=1&p=" + productid + "&s=" + userrndstr;
+        location.href = window.location.protocol + "//" + window.location.hostname + "/wxpay.php?m=1&p=" + productid + "&s=" + userrndstr;
+    } else if (isMobile()) {
+        $("#mytitle").html("请用微信扫码支付");
+        $("#mycontent").html("");
+        $("#mycontent").qrcode(window.location.protocol + "//" + window.location.hostname + "/wxpay.php?p=" + productid + "&s=" + userrndstr);
+        $("#mycontent").append("<p>您可以截图后在微信中识别二维码支付，或将下面的付款链接复制到微信中打开。</p><p style='word-break:break-all;' class='copy_p'>" + window.location.protocol + "//" + window.location.hostname + "/wxpay.php?p=" + productid + "&s=" + userrndstr + "</p>");
+
+        layerqrcode = layer.open({
+            type: 1,
+            title: false,
+            closeBtn: false,
+            area: ['300px', '440px'],
+            offset: ['calc(50% - 220px)', 'calc(50% - 150px)'],
+            content: $('#mydialog'),
+            shadeClose: true,
+            success: function (layero, index) {
+                // 点击任意区域自动隐藏
+                layero.on('click', function () {
+                    layer.close(index);
+                });
+            }
+        });
+        currentTime = new Date().toLocaleString('zh-CN', {
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit',
+            hour12: false,
+            timeZone: 'Asia/Shanghai'
+        }).replace(/\//g, '-').replace(',', '');
+        checkwxpaystatus();
     } else {
         $("#mycontent").html("");
-        $("#mycontent").qrcode("http://" + window.location.hostname + "/wxpay.php?p=" + productid + "&s=" + userrndstr);
+        $("#mycontent").qrcode(window.location.protocol + "//" + window.location.hostname + "/wxpay.php?p=" + productid + "&s=" + userrndstr);
 
         $("#mytitle").html("请用微信扫码支付");
         layerqrcode = layer.open({
@@ -1367,12 +1551,24 @@ function showalipayqrcode() {
 
         var isWechat = /MicroMessenger/i.test(navigator.userAgent);
         if (isWechat) {
-            $("#mytitle").html("支付宝");
+            $("#mytitle").html("使用支付宝付款");
             if (/iPhone/i.test(navigator.userAgent)) {
-                $("#mycontent").html("<p style='font-size:18px;text-align:left;line-height:35px;'>点击下面的链接即可复制网址，在手机浏览器中访问即可跳转到支付宝进行支付。</p><p style='font-size:18px;text-align:left;line-height:35px;color:#000080;word-wrap:break-word;' onclick='location.href=\"" + alipayqrcodeurl + "\";'>" + alipayqrcodeurl + "</p>");
+                $("#mycontent").html("<p style='font-size:18px;text-align:left;line-height:35px;'>点击下面的链接即可复制网址，在手机浏览器中访问即可跳转到支付宝进行支付。</p><p style='font-size:18px;text-align:left;line-height:35px;color:#000080;word-break:break-all;' onclick='location.href=\"" + alipayqrcodeurl + "\";'>" + alipayqrcodeurl + "</p>");
             } else {
-                $("#mycontent").html("<p style='font-size:18px;text-align:left;line-height:35px;'>点击下面的链接即可复制网址，在手机浏览器中访问即可跳转到支付宝进行支付。</p><p style='font-size:18px;text-align:left;line-height:35px;color:#000080;word-wrap:break-word;' class='copy_p'>" + alipayqrcodeurl + "</p>");
+                $("#mycontent").html("<p style='font-size:18px;text-align:left;line-height:35px;'>点击下面的链接即可复制网址，在手机浏览器中访问即可跳转到支付宝进行支付。</p><p style='font-size:18px;text-align:left;line-height:35px;color:#000080;word-break:break-all;' class='copy_p'>" + alipayqrcodeurl + "</p>");
             }
+            layerqrcode = layer.open({
+                type: 1,
+                title: false,
+                closeBtn: false,
+                area: ['300px', '350px'],
+                offset: ['calc(50% - 175px)', 'calc(50% - 150px)'],
+                content: $('#mydialog'),
+                shadeClose: true,
+            });
+        } else if (isMobile()) {
+            $("#mytitle").html("使用支付宝付款");
+            $("#mycontent").html("<p style='font-size:18px;text-align:left;line-height:35px;'>点击下面的链接即可跳转到支付宝进行支付。</p><p style='font-size:18px;text-align:left;line-height:35px;color:#000080;word-break:break-all;' onclick='location.href=\"" + alipayqrcodeurl + "\";'>" + alipayqrcodeurl + "</p>");
             layerqrcode = layer.open({
                 type: 1,
                 title: false,
@@ -1482,7 +1678,6 @@ function checkloading(nowloading) {
             offset: '50%',
         }, function (index) {
             layer.close(index);
-            layer.close(loading);
             loading = 0;
             buttongo = true;
             $("#question").val("");
@@ -1491,7 +1686,7 @@ function checkloading(nowloading) {
             if (!isMobile()) $("#question").focus();
             layerconfirm = 0;
         }, function (index) {
-            if (!buttongo) {
+            if ((!buttongo) && (loading != 0)) {
                 loading = layer.msg('AI正在思考，请稍等片刻...', {
                     icon: 16,
                     shade: 0.4,
@@ -1505,6 +1700,8 @@ function checkloading(nowloading) {
                     marginTop: '-30px' //设置上边距为负的一半高度
                 });
                 setTimeout("checkloading(" + loading + ");", 60000);
+                layerconfirm = 0;
+            } else {
                 layerconfirm = 0;
             }
         });
